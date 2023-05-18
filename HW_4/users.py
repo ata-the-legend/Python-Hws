@@ -1,4 +1,23 @@
+"""
+Create and save the users and their additional info.
+
+Classes:
+
+    User:
+        A class for create users. 
+        This class uses hash algoritem SHA256 to save passwords.
+
+Raises:
+    PasswordError: For invalid passwords
+    UsernameError: For repeating username
+    EmptyError: For empty given username
+    ValueError: For invalid phone number
+    ValidationError: For Wrong password
+
+"""
+
 import uuid
+import hashlib
 
 class UsernameError(ValueError):
     pass
@@ -9,28 +28,73 @@ class PasswordError(ValueError):
 class EmptyError(ValueError):
     pass
 
-class User:
+class ValidationError(ValueError):
+    pass
 
+
+class User:
+    """
+    A class to represent a user.
+
+    ...
+
+    Attributes
+    ----------
+    username : str
+        username of the user
+    password : str
+        password of the user
+    phone_number : str
+        phone number of the user
+    id: uuid.UUID
+        A unic ID for each user
+
+    Methods
+    -------
+    sign_up(cls, username: str, password: str, phone_number: str) -> None:
+        Creates a new user
+    validation(username: str, password: str) -> bool:
+        Validates the password for a user
+    def profile(cls, username: str) -> 'User':
+        Returns username, phone number and id of a user
+    edit_profile(cls, old_username: str, new_username: str, new_phone_number: str) -> None:
+        Changes a users username and phone number
+    edit_password(username: str, old_password: str, new_password: str) -> None:
+        Changes a users password
+    """
     __users = {}
-    def __init__(self, username, password, phone_number = None) -> None:
+    def __init__(self, username: str, password: str, phone_number: str | None = None) -> None:
+        """
+        Initializes all the necessary attributes for the person object.
+
+        Args:
+            username (str): username of the user
+            password (str): password of the user
+            phone_number (str | None, optional): phone number of the user. Defaults to None.
+        """
+        self.username = username
         if len(password) < 4:
             raise PasswordError('Password should be more than 4 chars') 
-        self.username = username
         self.id = uuid.uuid4()
-        self.__password = password 
+        self.__password = hashlib.sha256(password.encode()).hexdigest() 
         self.phone_number = phone_number
         type(self).__users[self.username] = self
 
     @property
-    def username(self):
+    def username(self) -> str:
+        """
+        Getter for username attribute
+        """
         return self._username
 
     @username.setter
-    def username(self, username: str):
-        for user in User.__users.keys():
-            if username == user:
-                raise UsernameError('This username was taken.')
-        if username == '':
+    def username(self, username: str) -> None:
+        """
+        Setter for username attribute
+        """
+        if username in User.__users.keys():
+            raise UsernameError('This username was taken.')
+        elif username == '':
             raise EmptyError('Userame cant be empty!')
         self._username = username
 
@@ -40,11 +104,25 @@ class User:
     def __repr__(self) -> str:
         return f'({self.username}, {self.__password}, {self.phone_number}, {self.id})'
 
-    def users():
+    def users() -> dict:
+        """
+        Shows all users
+
+        Returns:
+            dict: All signed up users
+        """
         return User.__users
     
     @classmethod
-    def sign_up(cls, username, password, phone_number):
+    def sign_up(cls, username: str, password: str, phone_number: str) -> None:
+        """
+        Creates an object of user
+
+        Args:
+            username (str): username of the user
+            password (str): password of the user
+            phone_number (str | None, optional): phone number of the user. Defaults to None.
+        """
         if not phone_number:
             cls(username, password)
         elif not phone_number.isnumeric() or len(phone_number) != 11:
@@ -53,15 +131,42 @@ class User:
             cls(username, password, phone_number)
 
     @staticmethod
-    def validation(username, password):
-        return User.__users[username].__password == password
+    def validation(username: str, password: str) -> bool:
+        """
+        Validates a users password
+
+        Args:
+            username (str): username of the user
+            password (str): password of the user
+
+        Returns:
+            bool: True for right password
+        """
+        return User.__users[username].__password == hashlib.sha256(password.encode()).hexdigest()
 
     @classmethod
-    def profile(cls, username):
+    def profile(cls, username: str) -> 'User':
+        """
+        Checks users profile
+
+        Args:
+            username (str): username of the user
+
+        Returns:
+            User: Asked user object
+        """
         return cls.__users[username]
     
     @classmethod
-    def edit_profile(cls, old_username, new_username, new_phone_number):
+    def edit_profile(cls, old_username: str, new_username: str, new_phone_number: str) -> None:
+        """
+        Changes a users username and phone number
+
+        Args:
+            old_username (str): Current username of the user
+            new_username (str): New username of the user
+            new_phone_number (str): New phone number of the user
+        """
         user = cls.__users[old_username] 
         # if not new_phone_number:
         #     pass
@@ -73,42 +178,20 @@ class User:
         del cls.__users[old_username] 
 
     @staticmethod
-    def edit_password(username: str, new_password: str):
-        if len(new_password) < 4:
+    def edit_password(username: str, old_password: str, new_password: str) -> None:
+        """
+        Changes a password of a user
+  
+        Args:
+            username (str): username of the user
+            old_password (str): Current password of the user
+            new_password (str): New password of the user
+        """
+        if not User.validation(username, old_password):
+            raise ValidationError('Wrong password')
+        elif len(new_password) < 4:
             raise PasswordError('Password should be more than 4 chars') 
         user = User.__users[username]
-        user.__password = new_password
+        user.__password = hashlib.sha256(new_password.encode()).hexdigest()
 
 
-        
-
-
-# docstr
-
-
-
-
-
-
-
-
-
-# import random
-
-# self.id = f"{random.randint(0, 9):04}" ## bayad yekta bashe                     ### baze random ###
-#         flag= 1
-#         while flag:
-#             repeat = 0
-#             flag = 0
-#             for user in User.__users:
-#                 # print(self.id , self.username)
-#                 # s=0
-#                 while self.id == user.id: #and repeat < 10: # age az birun karbar avordim - jayi save kardim $##### random bashe ehtemalan tu 1000 tamum nemishe
-#                     self.id = f"{random.randint(0, 9):04}" #mitune be tatibam bashe
-#                     # print(self.id, user.id)
-#                     # print(s)
-#                     # s+=1
-#                     flag = 1
-#                 repeat += 1 #in doros nist chon shyad ye id yekrari ke gablan chek shode bud bede va user tekrari ro emtehankone
-#                 if repeat == 10: 
-#                     raise MemoryError('Capacitance is full') 
