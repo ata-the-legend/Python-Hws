@@ -21,13 +21,18 @@ class User:
         self.phone_number = phone_number
         type(self).__users[self.username] = self
 
-    # @username.setter
-    # def username(self, username: str):
-    #     for user in User.__users.keys():
-    #         if username == user:
-    #             raise UsernameError('This username was taken.')
-    #     self._usename
+    @property
+    def username(self):
+        return self._username
 
+    @username.setter
+    def username(self, username: str):
+        for user in User.__users.keys():
+            if username == user:
+                raise UsernameError('This username was taken.')
+        if username == '':
+            raise EmptyError('Userame cant be empty!')
+        self._username = username
 
     def __str__(self) -> str:
         return f'Username: {self.username}\nPhone Number: {self.phone_number}\nID: {self.id}'
@@ -40,13 +45,12 @@ class User:
     
     @classmethod
     def sign_up(cls, username, password, phone_number):
-        if username == '' or password == '':
-            raise EmptyError('Userame or Password cant be empty!')
         if not phone_number:
-            phone_number = None
+            cls(username, password)
         elif not phone_number.isnumeric() or len(phone_number) != 11:
             raise ValueError('Invalid phone number!')
-        cls(username, password, phone_number)
+        else:
+            cls(username, password, phone_number)
 
     @staticmethod
     def validation(username, password):
@@ -59,16 +63,10 @@ class User:
     @classmethod
     def edit_profile(cls, old_username, new_username, new_phone_number):
         user = cls.__users[old_username] 
-        for userr in User.__users.keys():
-            if new_username == userr:
-                raise UsernameError('This username was taken.')
-        if new_username == '':
-            raise EmptyError('Userame cant be empty!')
         # if not new_phone_number:
         #     pass
         if not new_phone_number.isnumeric() or len(new_phone_number) != 11:
             raise ValueError('Invalid phone number!')
-        
         user.username = new_username
         user.phone_number = new_phone_number
         cls.__users[new_username] = cls.__users[old_username] 
@@ -76,15 +74,15 @@ class User:
 
     @staticmethod
     def edit_password(username: str, new_password: str):
-        user = User.__users[username]
         if len(new_password) < 4:
             raise PasswordError('Password should be more than 4 chars') 
+        user = User.__users[username]
         user.__password = new_password
 
 
         
 
-# getter setter
+
 # docstr
 
 
