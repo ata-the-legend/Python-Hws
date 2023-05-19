@@ -105,6 +105,7 @@ def main():
     """
     Main func for menu
     """
+    User.from_json()
     while True:
         print('\n'+50*'-'+'\nLog In')
         user_command = input(50*'-'+"\n(1 --> sign up, 2 --> sign in, 0 --> Exit): ")
@@ -112,12 +113,14 @@ def main():
         match user_command:
             case '0':
                 break
+            
             case '1':
                 sign_in_flag = sign_up()
                 while not sign_in_flag:
                     if input("Try again?(y/n): ").lower() == 'n':
                         break 
                     sign_in_flag = sign_up()
+            
             case '2':
                 (flag, username) = sign_in()
                 while not flag:
@@ -133,6 +136,7 @@ def main():
                         match signed_command:
                             case '1':
                                 print(f'Your Profile:\n{User.profile(username)}')
+                            
                             case '2':
                                 change_profile = edit_prof(username) # if True --> profile changed 
                                 while not change_profile[0]:
@@ -143,6 +147,7 @@ def main():
                                 username = change_profile[1] # either this or next line
                                 # if change_profile:
                                 #     break
+                            
                             case '3':
                                 change_pass = edit_pass(username) # if True --> pass changed 
                                 while not change_pass:
@@ -152,12 +157,17 @@ def main():
                                     change_pass = edit_pass(username)
                                 if change_pass:
                                     break
+                            
                             case '4':
                                 break
+                            
                             case _:
                                 print('Invalid Command!')
+            
             case _:
                 print("Invalid command!")
+    
+        User.to_json()
 
 
 if __name__ == '__main__':
